@@ -5,11 +5,75 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <title>Document</title>
+    <title>CodeArena</title>
 </head>
 
 <body>
-    <h1 class="text-cyan-600 text-4xl">CodeArena</h1>
+    <header class="bg-gray-900 text-white shadow-md">
+        <nav class="container mx-auto flex items-center justify-between p-4">
+            <div class="text-2xl font-bold">CodeArena</div>
+            <div class="hidden md:flex gap-6 items-center">
+                <a href="#torneos" class="hover:text-yellow-400 transition">Torneos</a>
+                <a href="pages/login.html" class="hover:text-yellow-400 transition">Login</a>
+                <a href="pages/resgister.html" class="hover:text-yellow-400 transition">Registro</a>
+            </div>
+            <button id="menu-btn" class="md:hidden focus:outline-none">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                </svg>
+            </button>
+        </nav>
+        <div id="mobile-menu" class="md:hidden hidden bg-gray-800 px-4 pb-4">
+            <a href="#torneos" class="block py-2 text-white hover:text-yellow-400">Torneos</a>
+            <a href="pages/login.html" class="block py-2 text-white hover:text-yellow-400">Login</a>
+            <a href="pages/resgister.html" class="block py-2 text-white hover:text-yellow-400">Registro</a>
+        </div>
+    </header>
+    <main class="bg-gray-100 min-h-screen">
+        <section class="flex flex-col items-center justify-center text-center py-16 px-4 bg-gradient-to-br from-yellow-400 to-pink-500">
+            <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-lg">¡Bienvenido a CodeArena!</h1>
+            <p class="text-lg md:text-2xl text-white mb-8 max-w-2xl">Compite en torneos de programación, mejora tus habilidades y escala en el ranking. ¡Inscríbete y demuestra tu talento!</p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#torneos" class="bg-white text-yellow-500 font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-400 hover:text-white transition">Ver Torneos</a>
+                <a href="pages/login.html" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-gray-700 transition">Login</a>
+                <a href="pages/resgister.html" class="bg-yellow-500 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-600 transition">Registro</a>
+            </div>
+        </section>
+        <section id="torneos" class="container mx-auto py-16 px-4">
+            <h2 class="text-3xl font-bold text-center mb-10 text-gray-800">Próximos Torneos</h2>
+            <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                <!-- Torneo 1 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Torneo de Algoritmos</h3>
+                    <p class="text-gray-600 mb-4">Fecha: 10/05/2026<br>Premio: Medalla + Puntos Ranking</p>
+                    <a href="pages/resgister.html" class="bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</a>
+                </div>
+                <!-- Torneo 2 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Torneo de Estructuras de Datos</h3>
+                    <p class="text-gray-600 mb-4">Fecha: 24/05/2026<br>Premio: Trofeo + Puntos Ranking</p>
+                    <a href="pages/resgister.html" class="bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</a>
+                </div>
+                <!-- Torneo 3 -->
+                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col items-center">
+                    <h3 class="text-xl font-bold mb-2 text-gray-900">Torneo de Programación Competitiva</h3>
+                    <p class="text-gray-600 mb-4">Fecha: 07/06/2026<br>Premio: Certificado + Puntos Ranking</p>
+                    <a href="pages/resgister.html" class="bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</a>
+                </div>
+            </div>
+        </section>
+    </main>
+    <footer class="bg-gray-900 text-white text-center py-6 mt-8">
+        <p>&copy; 2026 CodeArena. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        // Menú hamburguesa
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+    </script>
 </body>
 
 </html>
