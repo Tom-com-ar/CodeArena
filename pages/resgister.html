@@ -44,44 +44,49 @@
         <p>&copy; 2026 CodeArena</p>
     </footer>
     <script>
-        document.getElementById('registerForm').addEventListener('submit', async function(event) {
+        const storageKey = 'codearena_users';
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(storageKey) || '[]');
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(storageKey, JSON.stringify(users));
+        }
+
+        function showMessage(text) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.textContent = text;
+            messageDiv.classList.remove('hidden');
+        }
+
+        document.getElementById('registerForm').addEventListener('submit', function(event) {
             event.preventDefault();
-            
-            const name = document.getElementById('name').value;
-            const email = document.getElementById('email').value;
+
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim().toLowerCase();
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
-            const messageDiv = document.getElementById('message');
-            
-            // Validación básica
+
             if (password !== confirmPassword) {
-                messageDiv.textContent = 'Las contraseñas no coinciden';
-                messageDiv.classList.remove('hidden');
+                showMessage('Las contraseñas no coinciden');
                 return;
             }
-            
-            try {
-                const response = await fetch('/auth/register', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ name, email, password })
-                });
-                
-                const data = await response.json();
-                
-                if (response.ok) {
-                    // Redirigir al login
-                    window.location.href = 'login.html';
-                } else {
-                    messageDiv.textContent = data.message || 'Error en el registro';
-                    messageDiv.classList.remove('hidden');
-                }
-            } catch (error) {
-                messageDiv.textContent = 'Error de conexión';
-                messageDiv.classList.remove('hidden');
+
+            const users = getUsers();
+            if (users.some(user => user.email === email)) {
+                showMessage('El email ya está registrado');
+                return;
             }
+
+            users.push({
+                name,
+                email,
+                password
+            });
+            saveUsers(users);
+
+            window.location.href = 'login.html';
         });
     </script>
 </body>
