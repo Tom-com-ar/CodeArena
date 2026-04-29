@@ -7,6 +7,7 @@
     <title>CodeArena - Perfil</title>
 </head>
 
+<<<<<<< HEAD
 <body class="bg-gray-100">
 
 <!-- HEADER -->
@@ -137,5 +138,55 @@
     <p>&copy; 2026 CodeArena</p>
 </footer>
 
+=======
+<body>
+    <header class="bg-gray-900 text-white shadow-md">
+        <nav class="container mx-auto flex items-center justify-between p-4">
+            <div class="text-2xl font-bold">CodeArena</div>
+            <div class="flex items-center gap-4">
+                <span id="welcomeUser" class="text-sm hidden md:inline-block"></span>
+                <a href="../index.html" class="hover:text-yellow-400 transition">Inicio</a>
+                <button id="logoutBtn" class="bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-full hover:bg-yellow-400 transition">Cerrar sesión</button>
+            </div>
+        </nav>
+    </header>
+    <main class="min-h-screen bg-gray-100 flex items-center justify-center p-6">
+        <div class="bg-white rounded-xl shadow-lg p-10 max-w-3xl w-full text-center">
+            <h1 class="text-4xl font-bold mb-4 text-gray-900">Dashboard</h1>
+            <p id="dashboardText" class="text-gray-700 text-lg"></p>
+            <div class="mt-8 grid gap-4 md:grid-cols-2">
+                <div class="bg-yellow-100 border border-yellow-300 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold mb-2">Tus torneos</h2>
+                    <p class="text-gray-600">Pronto podrás ver aquí tus inscripciones y resultados.</p>
+                </div>
+                <div class="bg-yellow-100 border border-yellow-300 rounded-xl p-6">
+                    <h2 class="text-xl font-semibold mb-2">Tu perfil</h2>
+                    <p class="text-gray-600" id="profileInfo"></p>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-gray-900 text-white text-center py-6">
+        <p>&copy; 2026 CodeArena</p>
+    </footer>
+    <script>
+        const storageKey = 'codearena_current_user';
+        const user = JSON.parse(localStorage.getItem(storageKey) || 'null');
+
+        if (!user) {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('welcomeUser').textContent = `Hola, ${user.nombre}`;
+            document.getElementById('welcomeUser').classList.remove('hidden');
+            document.getElementById('dashboardText').textContent = `Has iniciado sesión como ${user.nombre} con el correo ${user.email}.`;
+            document.getElementById('profileInfo').textContent = `Nombre: ${user.nombre} · Email: ${user.email}`;
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            localStorage.removeItem(storageKey);
+            window.location.href = '../index.html';
+        });
+    </script>
+>>>>>>> 6611b11040a45fda964f7cc8ca5732f215048516
 </body>
 </html>

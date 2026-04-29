@@ -12,7 +12,7 @@
     <header class="bg-gray-900 text-white shadow-md">
         <nav class="container mx-auto flex items-center justify-between p-4">
             <div class="text-2xl font-bold">CodeArena</div>
-            <div class="hidden md:flex gap-6 items-center">
+            <div class="hidden md:flex gap-6 items-center" id="nav-links">
                 <a href="#torneos" class="hover:text-yellow-400 transition">Torneos</a>
                 <a href="pages/login.html" class="hover:text-yellow-400 transition">Login</a>
                 <a href="pages/resgister.html" class="hover:text-yellow-400 transition">Registro</a>
@@ -33,7 +33,7 @@
         <section class="flex flex-col items-center justify-center text-center py-16 px-4 bg-amber-700">
             <h1 class="text-4xl md:text-6xl font-extrabold text-white mb-4 drop-shadow-lg">¡Bienvenido a CodeArena!</h1>
             <p class="text-lg md:text-2xl text-white mb-8 max-w-2xl">Compite en torneos de programación, mejora tus habilidades y escala en el ranking. ¡Inscríbete y demuestra tu talento!</p>
-            <div class="flex flex-col md:flex-row gap-4 justify-center">
+            <div class="flex flex-col md:flex-row gap-4 justify-center" id="hero-buttons">
                 <a href="#torneos" class="bg-white text-yellow-500 font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-400 hover:text-white transition">Ver Torneos</a>
                 <a href="pages/login.html" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-gray-700 transition">Login</a>
                 <a href="pages/resgister.html" class="bg-yellow-500 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-600 transition">Registro</a>
@@ -67,12 +67,80 @@
         <p>&copy; 2026 CodeArena. Todos los derechos reservados.</p>
     </footer>
     <script>
-        // Menú hamburguesa
+        const storageKey = 'codearena_current_user';
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
+
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem(storageKey) || 'null');
+        }
+
+        function logout() {
+            localStorage.removeItem(storageKey);
+            window.location.href = 'index.html';
+        }
+
+        function renderNavigation() {
+            const user = getCurrentUser();
+            const navLinks = document.getElementById('nav-links');
+            const mobileLinks = document.getElementById('mobile-menu');
+
+            if (user) {
+                navLinks.innerHTML = `
+                    <a href="#torneos" class="hover:text-yellow-400 transition">Torneos</a>
+                    <a href="pages/dashboard.html" class="hover:text-yellow-400 transition">Dashboard</a>
+                    <button id="logoutBtn" class="text-yellow-500 font-semibold hover:text-yellow-400 transition">Cerrar sesión</button>
+                `;
+
+                mobileLinks.innerHTML = `
+                    <a href="#torneos" class="block py-2 text-white hover:text-yellow-400">Torneos</a>
+                    <a href="pages/dashboard.html" class="block py-2 text-white hover:text-yellow-400">Dashboard</a>
+                    <button id="logoutBtnMobile" class="w-full text-left py-2 text-white hover:text-yellow-400">Cerrar sesión</button>
+                `;
+
+                document.getElementById('logoutBtn').addEventListener('click', logout);
+                document.getElementById('logoutBtnMobile').addEventListener('click', logout);
+            } else {
+                navLinks.innerHTML = `
+                    <a href="#torneos" class="hover:text-yellow-400 transition">Torneos</a>
+                    <a href="pages/login.html" class="hover:text-yellow-400 transition">Login</a>
+                    <a href="pages/resgister.html" class="hover:text-yellow-400 transition">Registro</a>
+                `;
+
+                mobileLinks.innerHTML = `
+                    <a href="#torneos" class="block py-2 text-white hover:text-yellow-400">Torneos</a>
+                    <a href="pages/login.html" class="block py-2 text-white hover:text-yellow-400">Login</a>
+                    <a href="pages/resgister.html" class="block py-2 text-white hover:text-yellow-400">Registro</a>
+                `;
+            }
+        }
+
+        function renderHeroButtons() {
+            const user = getCurrentUser();
+            const heroButtons = document.getElementById('hero-buttons');
+
+            if (user) {
+                heroButtons.innerHTML = `
+                    <a href="#torneos" class="bg-white text-yellow-500 font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-400 hover:text-white transition">Ver Torneos</a>
+                    <a href="pages/dashboard.html" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-gray-700 transition">Ir al Dashboard</a>
+                    <button id="heroLogout" class="bg-yellow-500 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-600 transition">Cerrar sesión</button>
+                `;
+                document.getElementById('heroLogout').addEventListener('click', logout);
+            } else {
+                heroButtons.innerHTML = `
+                    <a href="#torneos" class="bg-white text-yellow-500 font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-400 hover:text-white transition">Ver Torneos</a>
+                    <a href="pages/login.html" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-gray-700 transition">Login</a>
+                    <a href="pages/resgister.html" class="bg-yellow-500 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-600 transition">Registro</a>
+                `;
+            }
+        }
+
         menuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
+
+        renderNavigation();
+        renderHeroButtons();
     </script>
 </body>
 
