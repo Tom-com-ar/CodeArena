@@ -1,18 +1,17 @@
 {
   "name": "codearena-backend",
   "version": "1.0.0",
-  "description": "Backend CodeArena - Torneos de programación",
-  "main": "src/server.js",
-  "type": "commonjs",
+  "description": "",
+  "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"nodemon src/server.js\" \"tailwindcss -i ./src/style.css -o ./src/output.css --watch\"",
-    "start": "node src/server.js",
-    "build": "tailwindcss -i ./src/style.css -o ./src/output.css --minify"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "type": "commonjs",
   "dependencies": {
+    "@tailwindcss/cli": "^4.2.4",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
@@ -23,7 +22,6 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.5.0",
-    "concurrently": "^9.2.1",
     "nodemon": "^3.1.14",
     "postcss": "^8.5.12",
     "tailwindcss": "^4.2.4"
