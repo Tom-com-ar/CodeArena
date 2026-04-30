@@ -15,6 +15,7 @@
             <div class="flex items-center gap-4">
                 <span id="welcomeUser" class="text-sm hidden md:inline-block"></span>
                 <a href="../index.html" class="hover:text-yellow-400 transition">Inicio</a>
+                <a id="adminPanelLink" href="admin.html" class="hidden hover:text-yellow-400 transition">Panel admin</a>
                 <button id="logoutBtn" class="bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-full hover:bg-yellow-400 transition">Cerrar sesión</button>
             </div>
         </nav>
@@ -45,10 +46,15 @@
         if (!user) {
             window.location.href = 'login.html';
         } else {
-            document.getElementById('welcomeUser').textContent = `Hola, ${user.nombre}`;
+            document.getElementById('welcomeUser').textContent = `Hola, ${user.name || user.nombre}`;
             document.getElementById('welcomeUser').classList.remove('hidden');
-            document.getElementById('dashboardText').textContent = `Has iniciado sesión como ${user.nombre} con el correo ${user.email}.`;
-            document.getElementById('profileInfo').textContent = `Nombre: ${user.nombre} · Email: ${user.email}`;
+            const displayName = user.name || user.nombre;
+            document.getElementById('dashboardText').textContent = `Has iniciado sesión como ${displayName} con el correo ${user.email}.`;
+            document.getElementById('profileInfo').textContent = `Nombre: ${displayName} · Email: ${user.email} · Rol: ${user.role || 'usuario'}`;
+
+            if (user.role === 'admin') {
+                document.getElementById('adminPanelLink').classList.remove('hidden');
+            }
         }
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
