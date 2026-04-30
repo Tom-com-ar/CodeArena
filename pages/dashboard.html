@@ -7,186 +7,158 @@
     <title>CodeArena - Perfil</title>
 </head>
 
-<<<<<<< HEAD
+
 <body class="bg-gray-100">
-
-<!-- HEADER -->
-<header class="bg-gray-900 text-white shadow-md">
-    <nav class="container mx-auto flex flex-col md:flex-row items-center justify-between p-4 gap-2">
-        <a href="../index.html" class="text-2xl font-bold">CodeArena</a>
-
-        <span class="text-sm md:text-lg text-gray-300">
-            Panel de Usuario
-        </span>
-
-        <a href="login.html"
-           class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition w-full md:w-auto text-center">
-            Cerrar sesión
-        </a>
-    </nav>
-</header>
-
-<!-- MAIN -->
-<main class="min-h-screen py-6 md:py-10 px-4">
-
-    <div class="container mx-auto max-w-4xl">
-
-        <!-- USER CARD -->
-        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
-
-            <div class="flex">
-                <div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-yellow-400 flex items-center justify-center text-3xl md:text-4xl font-bold text-white">
-                    U
-                </div>
-            </div>
-
-            <div>
-                <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-1">
-                    Nombre del Usuario
-                </h2>
-
-                <p class="text-gray-700 text-sm md:text-base">
-                    usuario@email.com
-                </p>
-
-                <p class="text-gray-500 text-sm">
-                    Miembro desde: 2026
-                </p>
-            </div>
-        </div>
-
-        <!-- TORNEOS -->
-        <div class="bg-white rounded-xl shadow-lg p-4 md:p-6">
-
-            <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4">
-                Torneos Inscripto
-            </h3>
-
-            <!-- MOBILE CARDS (mejor que tabla en celular) -->
-            <div class="block md:hidden space-y-3">
-
-                <div class="border rounded-lg p-3">
-                    <p class="font-semibold">Torneo de Algoritmos</p>
-                    <p class="text-sm text-gray-500">10/05/2026</p>
-                    <span class="inline-block mt-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Inscripto
-                    </span>
-                </div>
-
-                <div class="border rounded-lg p-3">
-                    <p class="font-semibold">Torneo de Estructuras de Datos</p>
-                    <p class="text-sm text-gray-500">24/05/2026</p>
-                    <span class="inline-block mt-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                        Inscripto
-                    </span>
-                </div>
-
-            </div>
-
-            <!-- DESKTOP TABLE -->
-            <div class="hidden md:block overflow-x-auto">
-
-                <table class="min-w-full divide-y divide-gray-200">
-
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Torneo
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Fecha
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                                Estado
-                            </th>
-                        </tr>
-                    </thead>
-
-                    <tbody class="bg-white divide-y divide-gray-200">
-
-                        <tr>
-                            <td class="px-6 py-4">Torneo de Algoritmos</td>
-                            <td class="px-6 py-4">10/05/2026</td>
-                            <td class="px-6 py-4">
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                    Inscripto
-                                </span>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td class="px-6 py-4">Torneo de Estructuras de Datos</td>
-                            <td class="px-6 py-4">24/05/2026</td>
-                            <td class="px-6 py-4">
-                                <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">
-                                    Inscripto
-                                </span>
-                            </td>
-                        </tr>
-
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-    </div>
-
-</main>
-
-<!-- FOOTER -->
-<footer class="bg-gray-900 text-white text-center py-4 mt-8">
-    <p>&copy; 2026 CodeArena</p>
-</footer>
-
-=======
-<body>
     <header class="bg-gray-900 text-white shadow-md">
-        <nav class="container mx-auto flex items-center justify-between p-4">
-            <div class="text-2xl font-bold">CodeArena</div>
-            <div class="flex items-center gap-4">
-                <span id="welcomeUser" class="text-sm hidden md:inline-block"></span>
-                <a href="../index.html" class="hover:text-yellow-400 transition">Inicio</a>
-                <button id="logoutBtn" class="bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-full hover:bg-yellow-400 transition">Cerrar sesión</button>
-            </div>
+        <nav class="container mx-auto flex flex-col md:flex-row items-center justify-between p-4 gap-2">
+            <a href="../index.html" class="text-2xl font-bold">CodeArena</a>
+            <span class="text-sm md:text-lg text-gray-300">Panel de Usuario</span>
+            <button id="logoutBtn" class="bg-yellow-500 text-white px-4 py-2 rounded-lg font-semibold hover:bg-yellow-600 transition w-full md:w-auto text-center">Cerrar sesión</button>
         </nav>
     </header>
-    <main class="min-h-screen bg-gray-100 flex items-center justify-center p-6">
-        <div class="bg-white rounded-xl shadow-lg p-10 max-w-3xl w-full text-center">
-            <h1 class="text-4xl font-bold mb-4 text-gray-900">Dashboard</h1>
-            <p id="dashboardText" class="text-gray-700 text-lg"></p>
-            <div class="mt-8 grid gap-4 md:grid-cols-2">
-                <div class="bg-yellow-100 border border-yellow-300 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold mb-2">Tus torneos</h2>
-                    <p class="text-gray-600">Pronto podrás ver aquí tus inscripciones y resultados.</p>
-                </div>
-                <div class="bg-yellow-100 border border-yellow-300 rounded-xl p-6">
-                    <h2 class="text-xl font-semibold mb-2">Tu perfil</h2>
-                    <p class="text-gray-600" id="profileInfo"></p>
+    <main class="min-h-screen py-6 md:py-10 px-4">
+        <div class="container mx-auto max-w-4xl">
+            <div id="user-card"></div>
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mt-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4">Torneos Disponibles</h3>
+                <div id="torneos-list" class="space-y-4"></div>
+            </div>
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mt-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4">Torneos Inscripto</h3>
+                <div id="torneos-inscripto-mobile" class="block md:hidden space-y-3"></div>
+                <div class="hidden md:block overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Torneo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="torneos-inscripto-table" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </main>
-    <footer class="bg-gray-900 text-white text-center py-6">
+    <footer class="bg-gray-900 text-white text-center py-4 mt-8">
         <p>&copy; 2026 CodeArena</p>
     </footer>
     <script>
         const storageKey = 'codearena_current_user';
-        const user = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        const torneosDisponibles = [
+            { nombre: 'Torneo de Algoritmos', fecha: '10/05/2026', id: 1 },
+            { nombre: 'Torneo de Estructuras de Datos', fecha: '24/05/2026', id: 2 },
+            { nombre: 'Torneo de Programación Competitiva', fecha: '07/06/2026', id: 3 }
+        ];
 
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem(storageKey) || 'null');
+        }
+
+        function setCurrentUser(user) {
+            localStorage.setItem(storageKey, JSON.stringify(user));
+        }
+
+        function logout() {
+            localStorage.removeItem(storageKey);
+            window.location.href = '../index.html';
+        }
+
+        function renderUserCard(user) {
+            const firstLetter = user.name ? user.name[0].toUpperCase() : 'U';
+            document.getElementById('user-card').innerHTML = `
+                <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mb-6 md:mb-8 flex flex-col md:flex-row items-center gap-4 md:gap-6 text-center md:text-left">
+                    <div class="flex">
+                        <div class="w-20 h-20 md:w-24 md:h-24 rounded-full bg-yellow-400 flex items-center justify-center text-3xl md:text-4xl font-bold text-white">
+                            ${firstLetter}
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-1">${user.name || 'Usuario'}</h2>
+                        <p class="text-gray-700 text-sm md:text-base">${user.email || ''}</p>
+                        <p class="text-gray-500 text-sm">Miembro desde: 2026</p>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderTorneosDisponibles(user) {
+            const container = document.getElementById('torneos-list');
+            container.innerHTML = '';
+            torneosDisponibles.forEach(torneo => {
+                const inscripto = user.torneos && user.torneos.find(t => t.id === torneo.id);
+                container.innerHTML += `
+                    <div class="border rounded-lg p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                        <div>
+                            <p class="font-semibold">${torneo.nombre}</p>
+                            <p class="text-sm text-gray-500">${torneo.fecha}</p>
+                        </div>
+                        <button class="${inscripto ? 'bg-gray-300 text-gray-500 cursor-not-allowed' : 'bg-yellow-500 text-white hover:bg-yellow-600'} px-4 py-2 rounded-lg font-semibold transition" ${inscripto ? 'disabled' : ''} onclick="inscribirse(${torneo.id})">
+                            ${inscripto ? 'Ya inscripto' : 'Inscribirse'}
+                        </button>
+                    </div>
+                `;
+            });
+        }
+
+        function renderTorneosInscripto(user) {
+            const mobile = document.getElementById('torneos-inscripto-mobile');
+            const table = document.getElementById('torneos-inscripto-table');
+            mobile.innerHTML = '';
+            table.innerHTML = '';
+            if (user.torneos && user.torneos.length > 0) {
+                user.torneos.forEach(torneo => {
+                    // Mobile card
+                    mobile.innerHTML += `
+                        <div class="border rounded-lg p-3">
+                            <p class="font-semibold">${torneo.nombre}</p>
+                            <p class="text-sm text-gray-500">${torneo.fecha}</p>
+                            <span class="inline-block mt-2 bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Inscripto</span>
+                        </div>
+                    `;
+                    // Table row
+                    table.innerHTML += `
+                        <tr>
+                            <td class="px-6 py-4">${torneo.nombre}</td>
+                            <td class="px-6 py-4">${torneo.fecha}</td>
+                            <td class="px-6 py-4"><span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold">Inscripto</span></td>
+                        </tr>
+                    `;
+                });
+            } else {
+                mobile.innerHTML = '<p class="text-gray-500">No estás inscripto en ningún torneo.</p>';
+                table.innerHTML = '<tr><td colspan="3" class="px-6 py-4 text-gray-500 text-center">No estás inscripto en ningún torneo.</td></tr>';
+            }
+        }
+
+        window.inscribirse = function(torneoId) {
+            let user = getCurrentUser();
+            if (!user) return;
+            if (!user.torneos) user.torneos = [];
+            const torneo = torneosDisponibles.find(t => t.id === torneoId);
+            if (!torneo) return;
+            if (user.torneos.find(t => t.id === torneoId)) return;
+            user.torneos.push(torneo);
+            setCurrentUser(user);
+            renderTorneosDisponibles(user);
+            renderTorneosInscripto(user);
+        }
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        // Inicialización
+        const user = getCurrentUser();
         if (!user) {
             window.location.href = 'login.html';
         } else {
-            document.getElementById('welcomeUser').textContent = `Hola, ${user.nombre}`;
-            document.getElementById('welcomeUser').classList.remove('hidden');
-            document.getElementById('dashboardText').textContent = `Has iniciado sesión como ${user.nombre} con el correo ${user.email}.`;
-            document.getElementById('profileInfo').textContent = `Nombre: ${user.nombre} · Email: ${user.email}`;
+            if (!user.torneos) user.torneos = [];
+            renderUserCard(user);
+            renderTorneosDisponibles(user);
+            renderTorneosInscripto(user);
         }
-
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem(storageKey);
-            window.location.href = '../index.html';
-        });
     </script>
->>>>>>> 6611b11040a45fda964f7cc8ca5732f215048516
+</body>
+
 </body>
 </html>
