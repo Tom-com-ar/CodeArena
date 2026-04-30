@@ -129,20 +129,58 @@
         function renderTournaments() {
             const cards = document.getElementById('torneoCards');
             const tournaments = getTournaments();
+            const user = getCurrentUser();
+            
             if (tournaments.length === 0) {
                 cards.innerHTML = `<div class="col-span-full bg-white rounded-xl shadow-lg p-6 text-center text-gray-700">No hay torneos disponibles aún. El administrador puede crear nuevos torneos en el panel de administrador.</div>`;
                 return;
             }
 
-            cards.innerHTML = tournaments.map(tournament => `
-                <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
-                    <h3 class="text-xl font-bold mb-2 text-gray-900">${tournament.nombre}</h3>
-                    <p class="text-gray-600 mb-4">${tournament.descripcion}</p>
-                    <p class="text-gray-500 mb-2"><strong>Inicio:</strong> ${tournament.fecha_inicio}</p>
-                    <p class="text-gray-500 mb-4"><strong>Fin:</strong> ${tournament.fecha_fin}</p>
-                    <span class="self-start rounded-full px-3 py-1 text-sm font-semibold ${tournament.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${tournament.activo ? 'Activo' : 'Inactivo'}</span>
-                </div>
-            `).join('');
+            cards.innerHTML = tournaments.map(tournament => {
+                let enrollButton = '';
+                if (user && user.role !== 'admin') {
+                    const key = `codearena_enrollments_${user.email}`;
+                    const enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+                    const isEnrolled = enrollments.includes(tournament.id);
+                    
+                    if (isEnrolled) {
+                        enrollButton = `<button disabled class="bg-green-500 text-white px-6 py-2 rounded-full font-semibold cursor-not-allowed">Inscrito</button>`;
+                    } else {
+                        enrollButton = `<button onclick="enrollTournament(${tournament.id})" class="bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</button>`;
+                    }
+                } else if (!user) {
+                    enrollButton = `<a href="pages/login.html" class="inline-block bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</a>`;
+                }
+
+                return `
+                    <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+                        <h3 class="text-xl font-bold mb-2 text-gray-900">${tournament.nombre}</h3>
+                        <p class="text-gray-600 mb-4">${tournament.descripcion}</p>
+                        <p class="text-gray-500 mb-2"><strong>Inicio:</strong> ${tournament.fecha_inicio}</p>
+                        <p class="text-gray-500 mb-4"><strong>Fin:</strong> ${tournament.fecha_fin}</p>
+                        <span class="self-start rounded-full px-3 py-1 text-sm font-semibold mb-4 ${tournament.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${tournament.activo ? 'Activo' : 'Inactivo'}</span>
+                        ${enrollButton}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function enrollTournament(tournamentId) {
+            const user = getCurrentUser();
+            if (!user || user.role === 'admin') {
+                alert('Solo los usuarios normales pueden inscribirse a torneos');
+                return;
+            }
+
+            const key = `codearena_enrollments_${user.email}`;
+            let enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            if (!enrollments.includes(tournamentId)) {
+                enrollments.push(tournamentId);
+                localStorage.setItem(key, JSON.stringify(enrollments));
+                alert('¡Te has inscrito al torneo exitosamente!');
+                renderTournaments();
+            }
         }
 
         menuBtn.addEventListener('click', () => {
