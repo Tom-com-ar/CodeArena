@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <title>Admin - CodeArena</title>
+</head>
+
+<body>
+    <header class="bg-gray-900 text-white shadow-md">
+        <nav class="container mx-auto flex items-center justify-between p-4">
+            <div class="text-2xl font-bold">CodeArena</div>
+            <div class="flex items-center gap-4">
+                <span id="welcomeUser" class="text-sm hidden md:inline-block"></span>
+                <a href="../index.html" class="hover:text-yellow-400 transition">Inicio</a>
+                <button id="logoutBtn" class="bg-yellow-500 text-gray-900 font-bold px-4 py-2 rounded-full hover:bg-yellow-400 transition">Cerrar sesión</button>
+            </div>
+        </nav>
+    </header>
+    <main class="min-h-screen bg-gray-100 p-6">
+        <div class="container mx-auto">
+            <div class="bg-white rounded-xl shadow-lg p-8 mb-8">
+                <h1 class="text-4xl font-bold mb-2 text-gray-900">Panel de administrador</h1>
+                <p class="text-gray-600">Crea, edita y elimina torneos desde aquí. Solo el usuario administrador puede acceder.</p>
+            </div>
+
+            <div class="grid gap-8 lg:grid-cols-2">
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Crear / editar torneo</h2>
+                    <form id="tournamentForm" class="space-y-4">
+                        <input type="hidden" id="tournamentId">
+                        <div>
+                            <label for="nombre" class="block text-gray-700 font-semibold mb-1">Nombre del torneo</label>
+                            <input type="text" id="nombre" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Nombre del torneo">
+                        </div>
+                        <div>
+                            <label for="descripcion" class="block text-gray-700 font-semibold mb-1">Descripción</label>
+                            <textarea id="descripcion" rows="4" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Descripción del torneo"></textarea>
+                        </div>
+                        <div class="grid gap-4 md:grid-cols-2">
+                            <div>
+                                <label for="fecha_inicio" class="block text-gray-700 font-semibold mb-1">Fecha inicio</label>
+                                <input type="date" id="fecha_inicio" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                            </div>
+                            <div>
+                                <label for="fecha_fin" class="block text-gray-700 font-semibold mb-1">Fecha fin</label>
+                                <input type="date" id="fecha_fin" required class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400">
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <input type="checkbox" id="activo" class="w-4 h-4 text-yellow-500 focus:ring-yellow-400 border-gray-300 rounded">
+                            <label for="activo" class="text-gray-700 font-semibold">Torneo activo</label>
+                        </div>
+                        <div class="flex gap-4 flex-wrap">
+                            <button type="submit" class="bg-yellow-500 text-white font-bold px-6 py-2 rounded-full hover:bg-yellow-600 transition">Guardar torneo</button>
+                            <button type="button" id="cancelEdit" class="bg-gray-200 text-gray-900 font-semibold px-6 py-2 rounded-full hover:bg-gray-300 transition">Limpiar</button>
+                        </div>
+                    </form>
+                    <div id="formMessage" class="mt-4 text-red-500 hidden"></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-semibold mb-4">Lista de torneos</h2>
+                    <div id="tournamentList" class="space-y-4"></div>
+                    <div id="listEmpty" class="text-gray-600">No hay torneos creados. Agrega uno con el formulario.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer class="bg-gray-900 text-white text-center py-6">
+        <p>&copy; 2026 CodeArena</p>
+    </footer>
+    <script>
+        const usersKey = 'codearena_users';
+        const currentUserKey = 'codearena_current_user';
+        const tournamentsKey = 'codearena_torneos';
+        const adminEmail = 'admin@codearena.com';
+        const adminPassword = 'Admin123!';
+
+        function getUsers() {
+            return JSON.parse(localStorage.getItem(usersKey) || '[]');
+        }
+
+        function saveUsers(users) {
+            localStorage.setItem(usersKey, JSON.stringify(users));
+        }
+
+        function initAdminUser() {
+            const users = getUsers();
+            const existingAdmin = users.find(user => user.email === adminEmail);
+            if (!existingAdmin) {
+                users.push({
+                    name: 'Administrador',
+                    email: adminEmail,
+                    password: adminPassword,
+                    role: 'admin'
+                });
+                saveUsers(users);
+            }
+        }
+
+        function getCurrentUser() {
+            return JSON.parse(localStorage.getItem(currentUserKey) || 'null');
+        }
+
+        function getTournaments() {
+            return JSON.parse(localStorage.getItem(tournamentsKey) || '[]');
+        }
+
+        function saveTournaments(tournaments) {
+            localStorage.setItem(tournamentsKey, JSON.stringify(tournaments));
+        }
+
+        function logout() {
+            localStorage.removeItem(currentUserKey);
+            window.location.href = '../index.html';
+        }
+
+        function showFormMessage(text) {
+            const message = document.getElementById('formMessage');
+            message.textContent = text;
+            message.classList.remove('hidden');
+        }
+
+        function clearFormMessage() {
+            const message = document.getElementById('formMessage');
+            message.textContent = '';
+            message.classList.add('hidden');
+        }
+
+        function resetForm() {
+            document.getElementById('tournamentId').value = '';
+            document.getElementById('nombre').value = '';
+            document.getElementById('descripcion').value = '';
+            document.getElementById('fecha_inicio').value = '';
+            document.getElementById('fecha_fin').value = '';
+            document.getElementById('activo').checked = true;
+            clearFormMessage();
+        }
+
+        function renderTournaments() {
+            const list = document.getElementById('tournamentList');
+            const tournaments = getTournaments();
+            list.innerHTML = '';
+
+            if (tournaments.length === 0) {
+                document.getElementById('listEmpty').classList.remove('hidden');
+                return;
+            }
+
+            document.getElementById('listEmpty').classList.add('hidden');
+
+            tournaments.forEach(tournament => {
+                const item = document.createElement('div');
+                item.className = 'border border-gray-200 rounded-xl p-4 bg-gray-50';
+                item.innerHTML = `
+                    <div class="flex justify-between items-start gap-4">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900">${tournament.nombre}</h3>
+                            <p class="text-gray-600">${tournament.descripcion}</p>
+                            <p class="text-gray-500 text-sm mt-2"><strong>Inicio:</strong> ${tournament.fecha_inicio}</p>
+                            <p class="text-gray-500 text-sm"><strong>Fin:</strong> ${tournament.fecha_fin}</p>
+                            <span class="inline-block mt-3 rounded-full px-3 py-1 text-sm font-semibold ${tournament.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${tournament.activo ? 'Activo' : 'Inactivo'}</span>
+                        </div>
+                        <div class="flex gap-2 flex-wrap">
+                            <button data-id="${tournament.id}" class="editBtn bg-blue-500 text-white px-4 py-2 rounded-full hover:bg-blue-600 transition">Editar</button>
+                            <button data-id="${tournament.id}" class="deleteBtn bg-red-500 text-white px-4 py-2 rounded-full hover:bg-red-600 transition">Eliminar</button>
+                        </div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            document.querySelectorAll('.editBtn').forEach(button => {
+                button.addEventListener('click', () => editTournament(button.dataset.id));
+            });
+
+            document.querySelectorAll('.deleteBtn').forEach(button => {
+                button.addEventListener('click', () => deleteTournament(button.dataset.id));
+            });
+        }
+
+        function editTournament(id) {
+            const tournaments = getTournaments();
+            const tournament = tournaments.find(item => item.id === Number(id));
+            if (!tournament) return;
+
+            document.getElementById('tournamentId').value = tournament.id;
+            document.getElementById('nombre').value = tournament.nombre;
+            document.getElementById('descripcion').value = tournament.descripcion;
+            document.getElementById('fecha_inicio').value = tournament.fecha_inicio;
+            document.getElementById('fecha_fin').value = tournament.fecha_fin;
+            document.getElementById('activo').checked = tournament.activo;
+            clearFormMessage();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function deleteTournament(id) {
+            if (!confirm('¿Eliminar este torneo?')) return;
+            const tournaments = getTournaments().filter(item => item.id !== Number(id));
+            saveTournaments(tournaments);
+            renderTournaments();
+        }
+
+        initAdminUser();
+
+        document.getElementById('logoutBtn').addEventListener('click', logout);
+
+        document.getElementById('tournamentForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            clearFormMessage();
+
+            const id = document.getElementById('tournamentId').value;
+            const nombre = document.getElementById('nombre').value.trim();
+            const descripcion = document.getElementById('descripcion').value.trim();
+            const fecha_inicio = document.getElementById('fecha_inicio').value;
+            const fecha_fin = document.getElementById('fecha_fin').value;
+            const activo = document.getElementById('activo').checked;
+
+            if (!nombre || !descripcion || !fecha_inicio || !fecha_fin) {
+                showFormMessage('Completa todos los campos.');
+                return;
+            }
+
+            if (fecha_fin < fecha_inicio) {
+                showFormMessage('La fecha de fin no puede ser anterior a la fecha de inicio.');
+                return;
+            }
+
+            const tournaments = getTournaments();
+            if (id) {
+                const index = tournaments.findIndex(item => item.id === Number(id));
+                tournaments[index] = { id: Number(id), nombre, descripcion, fecha_inicio, fecha_fin, activo };
+            } else {
+                tournaments.push({
+                    id: Date.now(),
+                    nombre,
+                    descripcion,
+                    fecha_inicio,
+                    fecha_fin,
+                    activo
+                });
+            }
+
+            saveTournaments(tournaments);
+            resetForm();
+            renderTournaments();
+        });
+
+        document.getElementById('cancelEdit').addEventListener('click', resetForm);
+
+        const currentUser = getCurrentUser();
+        if (!currentUser || currentUser.role !== 'admin') {
+            window.location.href = 'login.html';
+        } else {
+            document.getElementById('welcomeUser').textContent = `Hola, ${currentUser.name}`;
+            document.getElementById('welcomeUser').classList.remove('hidden');
+            renderTournaments();
+            resetForm();
+        }
+    </script>
+</body>
+</html>

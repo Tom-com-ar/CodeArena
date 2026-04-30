@@ -44,14 +44,29 @@
         <p>&copy; 2026 CodeArena</p>
     </footer>
     <script>
-        const storageKey = 'codearena_users';
+        const usersKey = 'codearena_users';
+        const adminEmail = 'admin@codearena.com';
 
         function getUsers() {
-            return JSON.parse(localStorage.getItem(storageKey) || '[]');
+            return JSON.parse(localStorage.getItem(usersKey) || '[]');
         }
 
         function saveUsers(users) {
-            localStorage.setItem(storageKey, JSON.stringify(users));
+            localStorage.setItem(usersKey, JSON.stringify(users));
+        }
+
+        function initAdminUser() {
+            const users = getUsers();
+            const existingAdmin = users.find(user => user.email === adminEmail);
+            if (!existingAdmin) {
+                users.push({
+                    name: 'Administrador',
+                    email: adminEmail,
+                    password: 'Admin123!',
+                    role: 'admin'
+                });
+                saveUsers(users);
+            }
         }
 
         function showMessage(text) {
@@ -59,6 +74,8 @@
             messageDiv.textContent = text;
             messageDiv.classList.remove('hidden');
         }
+
+        initAdminUser();
 
         document.getElementById('registerForm').addEventListener('submit', function(event) {
             event.preventDefault();
@@ -73,6 +90,11 @@
                 return;
             }
 
+            if (email === adminEmail) {
+                showMessage('No se puede registrar con el email de admin');
+                return;
+            }
+
             const users = getUsers();
             if (users.some(user => user.email === email)) {
                 showMessage('El email ya está registrado');
@@ -82,7 +104,8 @@
             users.push({
                 name,
                 email,
-                password
+                password,
+                role: 'usuario'
             });
             saveUsers(users);
 

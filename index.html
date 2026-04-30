@@ -67,16 +67,21 @@
         <p>&copy; 2026 CodeArena. Todos los derechos reservados.</p>
     </footer>
     <script>
-        const storageKey = 'codearena_current_user';
+        const currentUserKey = 'codearena_current_user';
+        const tournamentsKey = 'codearena_torneos';
         const menuBtn = document.getElementById('menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
 
         function getCurrentUser() {
-            return JSON.parse(localStorage.getItem(storageKey) || 'null');
+            return JSON.parse(localStorage.getItem(currentUserKey) || 'null');
+        }
+
+        function getTournaments() {
+            return JSON.parse(localStorage.getItem(tournamentsKey) || '[]');
         }
 
         function logout() {
-            localStorage.removeItem(storageKey);
+            localStorage.removeItem(currentUserKey);
             window.location.href = 'index.html';
         }
 
@@ -86,15 +91,18 @@
             const mobileLinks = document.getElementById('mobile-menu');
 
             if (user) {
+                const dashboardLink = user.role === 'admin' ? 'pages/admin.html' : 'pages/dashboard.html';
+                const dashboardText = user.role === 'admin' ? 'Panel admin' : 'Dashboard';
+
                 navLinks.innerHTML = `
                     <a href="#torneos" class="hover:text-yellow-400 transition">Torneos</a>
-                    <a href="pages/dashboard.html" class="hover:text-yellow-400 transition">Dashboard</a>
+                    <a href="${dashboardLink}" class="hover:text-yellow-400 transition">${dashboardText}</a>
                     <button id="logoutBtn" class="text-yellow-500 font-semibold hover:text-yellow-400 transition">Cerrar sesión</button>
                 `;
 
                 mobileLinks.innerHTML = `
                     <a href="#torneos" class="block py-2 text-white hover:text-yellow-400">Torneos</a>
-                    <a href="pages/dashboard.html" class="block py-2 text-white hover:text-yellow-400">Dashboard</a>
+                    <a href="${dashboardLink}" class="block py-2 text-white hover:text-yellow-400">${dashboardText}</a>
                     <button id="logoutBtnMobile" class="w-full text-left py-2 text-white hover:text-yellow-400">Cerrar sesión</button>
                 `;
 
@@ -120,9 +128,11 @@
             const heroButtons = document.getElementById('hero-buttons');
 
             if (user) {
+                const dashboardLink = user.role === 'admin' ? 'pages/admin.html' : 'pages/dashboard.html';
+                const dashboardText = user.role === 'admin' ? 'Ir al Panel admin' : 'Ir al Dashboard';
                 heroButtons.innerHTML = `
                     <a href="#torneos" class="bg-white text-yellow-500 font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-400 hover:text-white transition">Ver Torneos</a>
-                    <a href="pages/dashboard.html" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-gray-700 transition">Ir al Dashboard</a>
+                    <a href="${dashboardLink}" class="bg-gray-900 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-gray-700 transition">${dashboardText}</a>
                     <button id="heroLogout" class="bg-yellow-500 text-white font-bold px-8 py-3 rounded-full shadow hover:bg-yellow-600 transition">Cerrar sesión</button>
                 `;
                 document.getElementById('heroLogout').addEventListener('click', logout);
@@ -135,12 +145,70 @@
             }
         }
 
+        function renderTournaments() {
+            const cards = document.getElementById('torneoCards');
+            const tournaments = getTournaments();
+            const user = getCurrentUser();
+            
+            if (tournaments.length === 0) {
+                cards.innerHTML = `<div class="col-span-full bg-white rounded-xl shadow-lg p-6 text-center text-gray-700">No hay torneos disponibles aún. El administrador puede crear nuevos torneos en el panel de administrador.</div>`;
+                return;
+            }
+
+            cards.innerHTML = tournaments.map(tournament => {
+                let enrollButton = '';
+                if (user && user.role !== 'admin') {
+                    const key = `codearena_enrollments_${user.email}`;
+                    const enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+                    const isEnrolled = enrollments.includes(tournament.id);
+                    
+                    if (isEnrolled) {
+                        enrollButton = `<button disabled class="bg-green-500 text-white px-6 py-2 rounded-full font-semibold cursor-not-allowed">Inscrito</button>`;
+                    } else {
+                        enrollButton = `<button onclick="enrollTournament(${tournament.id})" class="bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</button>`;
+                    }
+                } else if (!user) {
+                    enrollButton = `<a href="pages/login.html" class="inline-block bg-yellow-500 text-white px-6 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Inscribirse</a>`;
+                }
+
+                return `
+                    <div class="bg-white rounded-xl shadow-lg p-6 flex flex-col">
+                        <h3 class="text-xl font-bold mb-2 text-gray-900">${tournament.nombre}</h3>
+                        <p class="text-gray-600 mb-4">${tournament.descripcion}</p>
+                        <p class="text-gray-500 mb-2"><strong>Inicio:</strong> ${tournament.fecha_inicio}</p>
+                        <p class="text-gray-500 mb-4"><strong>Fin:</strong> ${tournament.fecha_fin}</p>
+                        <span class="self-start rounded-full px-3 py-1 text-sm font-semibold mb-4 ${tournament.activo ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">${tournament.activo ? 'Activo' : 'Inactivo'}</span>
+                        ${enrollButton}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function enrollTournament(tournamentId) {
+            const user = getCurrentUser();
+            if (!user || user.role === 'admin') {
+                alert('Solo los usuarios normales pueden inscribirse a torneos');
+                return;
+            }
+
+            const key = `codearena_enrollments_${user.email}`;
+            let enrollments = JSON.parse(localStorage.getItem(key) || '[]');
+            
+            if (!enrollments.includes(tournamentId)) {
+                enrollments.push(tournamentId);
+                localStorage.setItem(key, JSON.stringify(enrollments));
+                alert('¡Te has inscrito al torneo exitosamente!');
+                renderTournaments();
+            }
+        }
+
         menuBtn.addEventListener('click', () => {
             mobileMenu.classList.toggle('hidden');
         });
 
         renderNavigation();
         renderHeroButtons();
+        renderTournaments();
     </script>
 </body>
 
