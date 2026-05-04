@@ -79,60 +79,60 @@
     </footer>
 
     <script>
-        const currentUserKey = 'codearena_current_user';
-        const tournamentsKey = 'codearena_torneos';
-        const user = JSON.parse(localStorage.getItem(currentUserKey) || 'null');
+    const currentUserKey = 'codearena_current_user';
+    const tournamentsKey = 'codearena_torneos';
+    const user = JSON.parse(localStorage.getItem(currentUserKey) || 'null');
 
-        if (!user || user.role === 'admin') {
-            window.location.href = 'login.html';
+    if (!user || user.role === 'admin') {
+        window.location.href = 'login.html';
+    }
+
+    // 🔹 MENU HAMBURGUESA
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    menuBtn.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+    });
+
+    function getEnrollments() {
+        const key = `codearena_enrollments_${user.email}`;
+        return JSON.parse(localStorage.getItem(key) || '[]');
+    }
+
+    function getTournaments() {
+        return JSON.parse(localStorage.getItem(tournamentsKey) || '[]');
+    }
+
+    function unenrollTournament(tournamentId) {
+        if (!confirm('¿Deseas abandonar este torneo?')) return;
+        const key = `codearena_enrollments_${user.email}`;
+        let enrollments = getEnrollments();
+        enrollments = enrollments.filter(id => id !== tournamentId);
+        localStorage.setItem(key, JSON.stringify(enrollments));
+        renderTournaments();
+    }
+
+    function renderTournaments() {
+        const enrollments = getEnrollments();
+        const tournaments = getTournaments();
+        const enrolledTourneys = tournaments.filter(t => enrollments.includes(t.id));
+
+        const mobileDiv = document.getElementById('enrolledTourneysMobile');
+        const desktopDiv = document.getElementById('enrolledTourneysDesktop');
+        const noTourneysDiv = document.getElementById('noTourneys');
+
+        if (enrolledTourneys.length === 0) {
+            mobileDiv.innerHTML = '';
+            desktopDiv.innerHTML = '';
+            noTourneysDiv.classList.remove('hidden');
+            return;
         }
 
-        // 🔹 MENU HAMBURGUESA
-        const menuBtn = document.getElementById('menu-btn');
-        const mobileMenu = document.getElementById('mobile-menu');
+        noTourneysDiv.classList.add('hidden');
 
-        menuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        function getEnrollments() {
-            const key = `codearena_enrollments_${user.email}`;
-            return JSON.parse(localStorage.getItem(key) || '[]');
-        }
-
-        function getTournaments() {
-            return JSON.parse(localStorage.getItem(tournamentsKey) || '[]');
-        }
-
-        function unenrollTournament(tournamentId) {
-            if (!confirm('¿Deseas abandonar este torneo?')) return;
-            const key = `codearena_enrollments_${user.email}`;
-            let enrollments = getEnrollments();
-            enrollments = enrollments.filter(id => id !== tournamentId);
-            localStorage.setItem(key, JSON.stringify(enrollments));
-            renderTournaments();
-        }
-
-        function renderTournaments() {
-            const enrollments = getEnrollments();
-            const tournaments = getTournaments();
-            const enrolledTourneys = tournaments.filter(t => enrollments.includes(t.id));
-
-            const mobileDiv = document.getElementById('enrolledTourneysMobile');
-            const desktopDiv = document.getElementById('enrolledTourneysDesktop');
-            const noTourneysDiv = document.getElementById('noTourneys');
-
-            if (enrolledTourneys.length === 0) {
-                mobileDiv.innerHTML = '';
-                desktopDiv.innerHTML = '';
-                noTourneysDiv.classList.remove('hidden');
-                return;
-            }
-
-            noTourneysDiv.classList.add('hidden');
-
-            // MOBILE
-            mobileDiv.innerHTML = enrolledTourneys.map(tournament => `
+        // MOBILE
+        mobileDiv.innerHTML = enrolledTourneys.map(tournament => `
             <div class="border rounded-lg p-3">
                 <p class="font-semibold">${tournament.nombre}</p>
                 <p class="text-sm text-gray-500">${tournament.fecha_inicio} hasta ${tournament.fecha_fin}</p>
@@ -144,8 +144,8 @@
             </div>
         `).join('');
 
-            // DESKTOP
-            desktopDiv.innerHTML = `
+        // DESKTOP
+        desktopDiv.innerHTML = `
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
@@ -171,31 +171,31 @@
                 </tbody>
             </table>
         `;
-        }
+    }
 
-        // 🔹 INIT USER INFO
-        const welcomeText = `Hola, ${user.name || user.email}`;
-        document.getElementById('welcomeUser').textContent = welcomeText;
-        document.getElementById('welcomeUserMobile').textContent = welcomeText;
+    // 🔹 INIT USER INFO
+    const welcomeText = `Hola, ${user.name || user.email}`;
+    document.getElementById('welcomeUser').textContent = welcomeText;
+    document.getElementById('welcomeUserMobile').textContent = welcomeText;
 
-        document.getElementById('userName').textContent = user.name || 'Usuario';
-        document.getElementById('userEmail').textContent = user.email;
-        document.getElementById('userInitial').textContent = (user.name || user.email).charAt(0).toUpperCase();
+    document.getElementById('userName').textContent = user.name || 'Usuario';
+    document.getElementById('userEmail').textContent = user.email;
+    document.getElementById('userInitial').textContent = (user.name || user.email).charAt(0).toUpperCase();
 
-        // 🔹 LOGOUT (DESKTOP)
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            localStorage.removeItem(currentUserKey);
-            window.location.href = '../index.html';
-        });
+    // 🔹 LOGOUT (DESKTOP)
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+        localStorage.removeItem(currentUserKey);
+        window.location.href = '../index.html';
+    });
 
-        // 🔹 LOGOUT (MOBILE)
-        document.getElementById('logoutBtnMobile').addEventListener('click', () => {
-            localStorage.removeItem(currentUserKey);
-            window.location.href = '../index.html';
-        });
+    // 🔹 LOGOUT (MOBILE)
+    document.getElementById('logoutBtnMobile').addEventListener('click', () => {
+        localStorage.removeItem(currentUserKey);
+        window.location.href = '../index.html';
+    });
 
-        renderTournaments();
-    </script>
+    renderTournaments();
+</script>
 </body>
 
 </html>
