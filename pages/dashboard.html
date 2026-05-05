@@ -54,6 +54,7 @@
                 <div>
                     <h2 id="userName" class="text-xl md:text-2xl font-bold text-gray-900 mb-1">Nombre del Usuario</h2>
                     <p id="userEmail" class="text-gray-700 text-sm md:text-base">usuario@email.com</p>
+                    <p id="userPoints" class="text-gray-700 text-sm md:text-base">Puntos totales: 0</p>
                     <p class="text-gray-500 text-sm">Miembro desde: 2026</p>
                 </div>
             </div>
@@ -70,6 +71,11 @@
 
                 <div id="noTourneys" class="text-center text-gray-600 py-8">No estás inscrito a ningún torneo aún.
                     ¡Vuelve al inicio e inscríbete!</div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow-lg p-4 md:p-6 mt-6">
+                <h3 class="text-lg md:text-xl font-bold text-gray-900 mb-4">Ranking de usuarios</h3>
+                <div id="rankingTable" class="overflow-x-auto"></div>
             </div>
         </div>
     </main>
@@ -104,19 +110,127 @@
         return JSON.parse(localStorage.getItem(tournamentsKey) || '[]');
     }
 
+    function getSubmissions(email) {
+        return JSON.parse(localStorage.getItem(`codearena_submissions_${email}`) || '[]');
+    }
+
+    function saveSubmissions(email, submissions) {
+        localStorage.setItem(`codearena_submissions_${email}`, JSON.stringify(submissions));
+    }
+
+    function getAllUsers() {
+        return JSON.parse(localStorage.getItem('codearena_users') || '[]');
+    }
+
+    function getUserTotalPoints(email) {
+        return getSubmissions(email).reduce((total, sub) => total + (Number(sub.score) || 0), 0);
+    }
+
+    function getAllUserRankings() {
+        return getAllUsers()
+            .filter((u) => u.role !== 'admin')
+            .map((u) => ({
+                name: u.name || u.email,
+                email: u.email,
+                points: getUserTotalPoints(u.email)
+            }))
+            .sort((a, b) => b.points - a.points);
+    }
+
     function unenrollTournament(tournamentId) {
         if (!confirm('¿Deseas abandonar este torneo?')) return;
         const key = `codearena_enrollments_${user.email}`;
         let enrollments = getEnrollments();
-        enrollments = enrollments.filter(id => id !== tournamentId);
+        enrollments = enrollments.filter((id) => id !== tournamentId);
         localStorage.setItem(key, JSON.stringify(enrollments));
         renderTournaments();
+    }
+
+    function submitResolution(tournamentId) {
+        const fileInput = document.getElementById(`resolutionFile_${tournamentId}`);
+        const scoreInput = document.getElementById(`scoreInput_${tournamentId}`);
+        const file = fileInput?.files?.[0];
+        const score = Number(scoreInput?.value);
+
+        if (!file) {
+            alert('Selecciona un archivo para subir.');
+            return;
+        }
+
+        if (!score || score < 1 || score > 100) {
+            alert('El puntaje debe ser un número entre 1 y 100.');
+            return;
+        }
+
+        const submissions = getSubmissions(user.email);
+        const existingIndex = submissions.findIndex((s) => s.tournamentId === tournamentId);
+        const submissionData = {
+            tournamentId,
+            fileName: file.name,
+            fileSize: file.size,
+            fileType: file.type,
+            score,
+            submittedAt: new Date().toISOString()
+        };
+
+        if (existingIndex >= 0) {
+            submissions[existingIndex] = submissionData;
+        } else {
+            submissions.push(submissionData);
+        }
+
+        saveSubmissions(user.email, submissions);
+        alert('Resolución enviada y evaluada correctamente.');
+        renderTournaments();
+        renderRanking();
+        renderUserCard();
+    }
+
+    function renderUserCard() {
+        const points = getUserTotalPoints(user.email);
+        const pointsElement = document.getElementById('userPoints');
+        if (pointsElement) {
+            pointsElement.textContent = `Puntos totales: ${points}`;
+        }
+    }
+
+    function renderRanking() {
+        const rankingTable = document.getElementById('rankingTable');
+        const rankings = getAllUserRankings();
+
+        if (!rankings.length) {
+            rankingTable.innerHTML = `<div class="text-gray-600 py-6 text-center">Aún no hay puntos registrados.</div>`;
+            return;
+        }
+
+        rankingTable.innerHTML = `
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Posición</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nombre</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Puntos</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    ${rankings.map((userRank, index) => `
+                        <tr>
+                            <td class="px-6 py-4 font-semibold text-gray-900">${index + 1}</td>
+                            <td class="px-6 py-4 text-gray-700">${userRank.name}</td>
+                            <td class="px-6 py-4 text-gray-700">${userRank.email}</td>
+                            <td class="px-6 py-4 text-gray-900 font-bold">${userRank.points}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
     }
 
     function renderTournaments() {
         const enrollments = getEnrollments();
         const tournaments = getTournaments();
-        const enrolledTourneys = tournaments.filter(t => enrollments.includes(t.id));
+        const enrolledTourneys = tournaments.filter((t) => enrollments.includes(t.id));
 
         const mobileDiv = document.getElementById('enrolledTourneysMobile');
         const desktopDiv = document.getElementById('enrolledTourneysDesktop');
@@ -131,56 +245,91 @@
 
         noTourneysDiv.classList.add('hidden');
 
-        // MOBILE
-        mobileDiv.innerHTML = enrolledTourneys.map(tournament => `
-            <div class="border rounded-lg p-3">
-                <p class="font-semibold">${tournament.nombre}</p>
-                <p class="text-sm text-gray-500">${tournament.fecha_inicio} hasta ${tournament.fecha_fin}</p>
-                <p class="text-sm text-gray-600 mt-1">${tournament.descripcion}</p>
-                <div class="mt-3 flex gap-2">
-                    <span class="flex-1 inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold text-center">Inscripto</span>
-                    <button onclick="unenrollTournament(${tournament.id})" class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-red-600 transition">Abandonar</button>
+        mobileDiv.innerHTML = enrolledTourneys.map((tournament) => {
+            const submission = getSubmissions(user.email).find((s) => s.tournamentId === tournament.id);
+            return `
+                <div class="border rounded-lg p-3">
+                    <p class="font-semibold">${tournament.nombre}</p>
+                    <p class="text-sm text-gray-500">${tournament.fecha_inicio} hasta ${tournament.fecha_fin}</p>
+                    <p class="text-sm text-gray-600 mt-1">${tournament.descripcion}</p>
+                    ${tournament.resolucion ? `<p class="text-sm text-gray-700 mt-2"><strong>Resolución:</strong> ${tournament.resolucion}</p>` : ''}
+                    <div class="mt-4 space-y-3">
+                        ${submission ? `
+                            <div class="rounded-lg bg-green-50 p-3 text-sm text-green-700">
+                                <p><strong>Archivo subido:</strong> ${submission.fileName}</p>
+                                <p><strong>Puntaje:</strong> ${submission.score} / 100</p>
+                                <p><strong>Fecha:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                            </div>
+                        ` : ''}
+                        <div class="rounded-lg bg-gray-50 p-3 border border-gray-200">
+                            <label class="block text-sm font-semibold text-gray-700">Archivo de resolución</label>
+                            <input type="file" id="resolutionFile_${tournament.id}" accept=".txt,.pdf,.zip,.js,.py,.java" class="mt-2 w-full text-sm text-gray-700" />
+                            <label class="block text-sm font-semibold text-gray-700 mt-4">Puntaje de evaluación</label>
+                            <input type="number" id="scoreInput_${tournament.id}" min="1" max="100" value="100" class="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                            <button onclick="submitResolution(${tournament.id})" class="mt-4 w-full bg-yellow-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Enviar resolución</button>
+                        </div>
+                    </div>
+                    <div class="mt-3 flex gap-2">
+                        <span class="flex-1 inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold text-center">Inscripto</span>
+                        <button onclick="unenrollTournament(${tournament.id})" class="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-semibold hover:bg-red-600 transition">Abandonar</button>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
 
-        // DESKTOP
         desktopDiv.innerHTML = `
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Torneo</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Descripción</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Inicio</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha Fin</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acción</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    ${enrolledTourneys.map(tournament => `
-                        <tr>
-                            <td class="px-6 py-4 font-semibold text-gray-900">${tournament.nombre}</td>
-                            <td class="px-6 py-4 text-gray-700">${tournament.descripcion}</td>
-                            <td class="px-6 py-4 text-gray-700">${tournament.fecha_inicio}</td>
-                            <td class="px-6 py-4 text-gray-700">${tournament.fecha_fin}</td>
-                            <td class="px-6 py-4">
-                                <button onclick="unenrollTournament(${tournament.id})" class="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-600 transition">Abandonar</button>
-                            </td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+            <div class="space-y-6">
+                ${enrolledTourneys.map((tournament) => {
+                    const submission = getSubmissions(user.email).find((s) => s.tournamentId === tournament.id);
+                    return `
+                        <div class="border rounded-xl p-5 bg-white shadow-sm">
+                            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4 items-start">
+                                <div class="lg:col-span-3">
+                                    <h4 class="text-lg font-semibold text-gray-900">${tournament.nombre}</h4>
+                                    <p class="text-gray-700 mt-2">${tournament.descripcion}</p>
+                                    ${tournament.resolucion ? `<p class="text-gray-700 mt-2"><strong>Resolución:</strong> ${tournament.resolucion}</p>` : ''}
+                                    <p class="text-sm text-gray-500 mt-3">${tournament.fecha_inicio} hasta ${tournament.fecha_fin}</p>
+                                </div>
+                                <div class="flex flex-col gap-3">
+                                    <button onclick="unenrollTournament(${tournament.id})" class="bg-red-500 text-white px-4 py-2 rounded-full text-sm font-semibold hover:bg-red-600 transition">Abandonar</button>
+                                </div>
+                            </div>
+                            ${submission ? `
+                                <div class="mt-6 rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-800">
+                                    <p><strong>Archivo subido:</strong> ${submission.fileName}</p>
+                                    <p><strong>Puntaje:</strong> ${submission.score} / 100</p>
+                                    <p><strong>Fecha:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
+                                </div>
+                            ` : ''}
+                            <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 p-4">
+                                <label class="block text-sm font-semibold text-gray-700">Archivo de resolución</label>
+                                <input type="file" id="resolutionFile_${tournament.id}" accept=".txt,.pdf,.zip,.js,.py,.java" class="mt-2 w-full text-sm text-gray-700" />
+                                <label class="block text-sm font-semibold text-gray-700 mt-4">Puntaje de evaluación</label>
+                                <input type="number" id="scoreInput_${tournament.id}" min="1" max="100" value="100" class="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                                <button onclick="submitResolution(${tournament.id})" class="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Enviar resolución</button>
+                            </div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
         `;
     }
 
-    // 🔹 INIT USER INFO
-    const welcomeText = `Hola, ${user.name || user.email}`;
-    document.getElementById('welcomeUser').textContent = welcomeText;
-    document.getElementById('welcomeUserMobile').textContent = welcomeText;
+    function updateDashboardText() {
+        const welcomeText = `Hola, ${user.name || user.email}`;
+        document.getElementById('welcomeUser').textContent = welcomeText;
+        document.getElementById('welcomeUserMobile').textContent = welcomeText;
+        document.getElementById('userName').textContent = user.name || 'Usuario';
+        document.getElementById('userEmail').textContent = user.email;
+        document.getElementById('userInitial').textContent = (user.name || user.email).charAt(0).toUpperCase();
+    }
 
-    document.getElementById('userName').textContent = user.name || 'Usuario';
-    document.getElementById('userEmail').textContent = user.email;
-    document.getElementById('userInitial').textContent = (user.name || user.email).charAt(0).toUpperCase();
+    function init() {
+        updateDashboardText();
+        renderUserCard();
+        renderTournaments();
+        renderRanking();
+    }
 
     // 🔹 LOGOUT (DESKTOP)
     document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -194,7 +343,7 @@
         window.location.href = '../index.html';
     });
 
-    renderTournaments();
+    init();
 </script>
 </body>
 
