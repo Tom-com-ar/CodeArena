@@ -146,41 +146,73 @@
         renderTournaments();
     }
 
-    function submitResolution(tournamentId) {
-        const fileInput = document.getElementById(`resolutionFile_${tournamentId}`);
-        const scoreInput = document.getElementById(`scoreInput_${tournamentId}`);
-        const file = fileInput?.files?.[0];
-        const score = Number(scoreInput?.value);
+    function normalizeText(text) {
+        return text.toLowerCase().trim().replace(/\s+/g, ' ');
+    }
 
-        if (!file) {
-            alert('Selecciona un archivo para subir.');
+    function calculateScore(answerText, expectedText) {
+        const answer = normalizeText(answerText);
+        const expected = normalizeText(expectedText || '');
+
+        if (!answer) {
+            return 0;
+        }
+        if (!expected) {
+            return 1;
+        }
+        if (answer === expected) {
+            return 100;
+        }
+
+        const answerWords = answer.split(' ');
+        const expectedWords = Array.from(new Set(expected.split(' ')));
+        const matchedWords = answerWords.filter((word) => expectedWords.includes(word));
+        const score = Math.round((matchedWords.length / expectedWords.length) * 100);
+        return Math.max(1, Math.min(100, score));
+    }
+
+    function getTournamentAnswer(tournamentId) {
+        const desktopInput = document.getElementById(`resolutionText_desktop_${tournamentId}`);
+        const mobileInput = document.getElementById(`resolutionText_mobile_${tournamentId}`);
+        const desktopValue = desktopInput?.value.trim();
+        const mobileValue = mobileInput?.value.trim();
+        return desktopValue || mobileValue || '';
+    }
+
+    function submitResolution(tournamentId) {
+        const answerText = getTournamentAnswer(tournamentId);
+        const tournament = getTournaments().find((t) => t.id === tournamentId);
+
+        if (!answerText) {
+            alert('Ingresa tu respuesta antes de enviar.');
             return;
         }
 
-        if (!score || score < 1 || score > 100) {
-            alert('El puntaje debe ser un número entre 1 y 100.');
+        if (!tournament) {
+            alert('No se encontró el torneo para evaluar la respuesta.');
             return;
         }
 
         const submissions = getSubmissions(user.email);
         const existingIndex = submissions.findIndex((s) => s.tournamentId === tournamentId);
+
+        if (existingIndex >= 0) {
+            alert('Ya enviaste una respuesta para este torneo. No puedes modificarla.');
+            return;
+        }
+
+        const score = calculateScore(answerText, tournament.resolucion);
         const submissionData = {
             tournamentId,
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type,
+            answerText,
             score,
             submittedAt: new Date().toISOString()
         };
 
-        if (existingIndex >= 0) {
-            submissions[existingIndex] = submissionData;
-        } else {
-            submissions.push(submissionData);
-        }
-
+        submissions.push(submissionData);
         saveSubmissions(user.email, submissions);
-        alert('Resolución enviada y evaluada correctamente.');
+        const correctAnswer = tournament.resolucion || 'No especificada';
+        alert(`Resolución enviada correctamente.\n\nPuntaje: ${score} / 100\nRespuesta correcta: ${correctAnswer}`);
         renderTournaments();
         renderRanking();
         renderUserCard();
@@ -196,7 +228,7 @@
 
     function renderRanking() {
         const rankingTable = document.getElementById('rankingTable');
-        const rankings = getAllUserRankings();
+        const rankings = getAllUserRankings().filter((userRank) => userRank.points > 0);
 
         if (!rankings.length) {
             rankingTable.innerHTML = `<div class="text-gray-600 py-6 text-center">Aún no hay puntos registrados.</div>`;
@@ -252,22 +284,21 @@
                     <p class="font-semibold">${tournament.nombre}</p>
                     <p class="text-sm text-gray-500">${tournament.fecha_inicio} hasta ${tournament.fecha_fin}</p>
                     <p class="text-sm text-gray-600 mt-1">${tournament.descripcion}</p>
-                    ${tournament.resolucion ? `<p class="text-sm text-gray-700 mt-2"><strong>Resolución:</strong> ${tournament.resolucion}</p>` : ''}
                     <div class="mt-4 space-y-3">
                         ${submission ? `
                             <div class="rounded-lg bg-green-50 p-3 text-sm text-green-700">
-                                <p><strong>Archivo subido:</strong> ${submission.fileName}</p>
+                                <p><strong>Tu respuesta:</strong> ${submission.answerText || submission.fileName || 'Respuesta enviada'}</p>
                                 <p><strong>Puntaje:</strong> ${submission.score} / 100</p>
                                 <p><strong>Fecha:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
                             </div>
                         ` : ''}
+                        ${!submission ? `
                         <div class="rounded-lg bg-gray-50 p-3 border border-gray-200">
-                            <label class="block text-sm font-semibold text-gray-700">Archivo de resolución</label>
-                            <input type="file" id="resolutionFile_${tournament.id}" accept=".txt,.pdf,.zip,.js,.py,.java" class="mt-2 w-full text-sm text-gray-700" />
-                            <label class="block text-sm font-semibold text-gray-700 mt-4">Puntaje de evaluación</label>
-                            <input type="number" id="scoreInput_${tournament.id}" min="1" max="100" value="100" class="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                            <label class="block text-sm font-semibold text-gray-700">Tu respuesta</label>
+                            <textarea id="resolutionText_mobile_${tournament.id}" rows="4" class="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Escribe aquí tu respuesta"></textarea>
                             <button onclick="submitResolution(${tournament.id})" class="mt-4 w-full bg-yellow-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Enviar resolución</button>
                         </div>
+                        ` : ''}
                     </div>
                     <div class="mt-3 flex gap-2">
                         <span class="flex-1 inline-block bg-green-100 text-green-800 px-3 py-1 rounded-full text-xs font-semibold text-center">Inscripto</span>
@@ -287,7 +318,6 @@
                                 <div class="lg:col-span-3">
                                     <h4 class="text-lg font-semibold text-gray-900">${tournament.nombre}</h4>
                                     <p class="text-gray-700 mt-2">${tournament.descripcion}</p>
-                                    ${tournament.resolucion ? `<p class="text-gray-700 mt-2"><strong>Resolución:</strong> ${tournament.resolucion}</p>` : ''}
                                     <p class="text-sm text-gray-500 mt-3">${tournament.fecha_inicio} hasta ${tournament.fecha_fin}</p>
                                 </div>
                                 <div class="flex flex-col gap-3">
@@ -296,18 +326,18 @@
                             </div>
                             ${submission ? `
                                 <div class="mt-6 rounded-lg bg-green-50 border border-green-200 p-4 text-sm text-green-800">
-                                    <p><strong>Archivo subido:</strong> ${submission.fileName}</p>
+                                    <p><strong>Tu respuesta:</strong> ${submission.answerText || submission.fileName || 'Respuesta enviada'}</p>
                                     <p><strong>Puntaje:</strong> ${submission.score} / 100</p>
                                     <p><strong>Fecha:</strong> ${new Date(submission.submittedAt).toLocaleString()}</p>
                                 </div>
                             ` : ''}
+                            ${!submission ? `
                             <div class="mt-6 rounded-lg bg-gray-50 border border-gray-200 p-4">
-                                <label class="block text-sm font-semibold text-gray-700">Archivo de resolución</label>
-                                <input type="file" id="resolutionFile_${tournament.id}" accept=".txt,.pdf,.zip,.js,.py,.java" class="mt-2 w-full text-sm text-gray-700" />
-                                <label class="block text-sm font-semibold text-gray-700 mt-4">Puntaje de evaluación</label>
-                                <input type="number" id="scoreInput_${tournament.id}" min="1" max="100" value="100" class="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" />
+                                <label class="block text-sm font-semibold text-gray-700">Tu respuesta</label>
+                                <textarea id="resolutionText_desktop_${tournament.id}" rows="4" class="mt-2 w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400" placeholder="Escribe aquí tu respuesta"></textarea>
                                 <button onclick="submitResolution(${tournament.id})" class="mt-4 bg-yellow-500 text-white px-4 py-2 rounded-full font-semibold hover:bg-yellow-600 transition">Enviar resolución</button>
                             </div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('')}
